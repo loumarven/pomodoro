@@ -7,7 +7,7 @@
 const START = "START";
 const PAUSE = "PAUSE";
 const RESUME = "RESUME";
-const PMDRMIN = 1;
+const PMDRMIN = 25;
 const PMDRSEC = 60;
 
 /* GLOBAL VARIABLES */
