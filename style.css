@@ -8,8 +8,9 @@
   left: 50%;
   position: absolute;
   text-align: center;
-  top: 15%;
+  top: 10%;
   transform: translateX(-50%);
+  /* width: 400px; */
 }
 
 /* TIMER STYLES */
@@ -55,4 +56,13 @@ button:hover {
 
 .stop:hover {
   background-color: #e74c3c;
+}
+
+/* ICON STYLES */
+.pomodoro-icons {
+  margin-top: 3em;
+}
+
+.pomodoro-icons > img {
+  visibility: hidden;
 }

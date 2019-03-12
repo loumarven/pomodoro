@@ -1,6 +1,5 @@
 /* TODO:
-  1. Implement break periods (5 minutes?)
-  2. Sound alarm when timer expires
+  1. Cleanup
 */
 
 /* CONSTANTS */
@@ -10,7 +9,8 @@ const RESUME = "RESUME";
 const WORK = "WORK";
 const BREAK = "BREAK";
 const WORKMIN = 25;
-const BREAKMIN = 5;
+const SHORTBREAKMIN = 5;
+const LONGBREAKMIN = 10;
 const DEFAULT_SEC = 0;
 
 /* GLOBAL VARIABLES */
@@ -25,6 +25,7 @@ let isStarted = false;
 let isPaused = false;
 let workInterval = 0;
 let breakInterval = 0;
+let pomodoroCount = 0;
 
 
 /* helper function to transform a one-digit number to two digits */
@@ -70,7 +71,7 @@ function startTimer() {
     audio.play();
 
     if (!isPaused) {
-      minutes = BREAKMIN;
+      minutes = pomodoroCount == 4 ? LONGBREAKMIN : SHORTBREAKMIN;
       seconds = DEFAULT_SEC;
     }
 
@@ -120,14 +121,30 @@ stop.addEventListener("click", stopTimer);
 /* event listeners for custom events */
 timer.addEventListener("donePomodoro", (e) => {
   clearInterval(workInterval);
+
+  pomodoroCount++;
+  document.querySelector(".pomodoro-icons > img:nth-child(" +
+                          pomodoroCount + ")").style.visibility = "visible";
+
   mode.textContent = BREAK;
   state = BREAK;
+
   startTimer();
 });
 
 timer.addEventListener("doneBreak", (e) => {
   clearInterval(breakInterval);
+
+  if (pomodoroCount == 4) {
+    let pomodoroIcons = document.querySelectorAll(".pomodoro-icons > img");
+    pomodoroIcons.forEach(icon => {
+      icon.style.visibility = "hidden";
+    });
+    pomodoroCount = 0;
+  }
+
   mode.textContent = WORK;
   state = WORK;
+
   startTimer();
 });
