@@ -1,7 +1,3 @@
-/* TODO:
-  1. Cleanup
-*/
-
 /* CONSTANTS */
 const START = "START";
 const PAUSE = "PAUSE";
@@ -23,6 +19,7 @@ let seconds = DEFAULT_SEC;
 let state = WORK;
 let isStarted = false;
 let isPaused = false;
+let isStopped = true;
 let workInterval = 0;
 let breakInterval = 0;
 let pomodoroCount = 0;
@@ -57,28 +54,22 @@ function startTimer() {
   timer.textContent = makeTwoDigits(minutes) + ":" + makeTwoDigits(seconds);
 
   if (state == WORK) {
-    audio = new Audio("audio/start_work.mp3");
-    audio.play();
-
     if (!isPaused) {
-      minutes = WORKMIN;
-      seconds = DEFAULT_SEC;
+      audio = new Audio("audio/start_work.mp3");
+      audio.play();
     }
 
     workInterval = setInterval(runTimer, 1000);
   } else if (state == BREAK) {
-    audio = new Audio("audio/start_break.mp3");
-    audio.play();
-
     if (!isPaused) {
-      minutes = pomodoroCount == 4 ? LONGBREAKMIN : SHORTBREAKMIN;
-      seconds = DEFAULT_SEC;
+      audio = new Audio("audio/start_break.mp3");
+      audio.play();
     }
 
     breakInterval = setInterval(runTimer, 1000);
   }
 
-  isStarted = true;
+  mode.textContent = state;
   start.textContent = PAUSE;
 }
 
@@ -88,8 +79,11 @@ function stopTimer() {
   minutes = WORKMIN;
   seconds = DEFAULT_SEC;
   isStarted = false;
+  isPaused = false;
+  isStopped = true;
   workInterval = 0;
   breakInterval = 0;
+  state = WORK;
 
   timer.textContent = makeTwoDigits(minutes) + ":" + makeTwoDigits(seconds);
   start.textContent = START;
@@ -99,18 +93,22 @@ function stopTimer() {
 
 /* event listeners for start and stop buttons */
 start.addEventListener("click", (e) => {
-  if (!isStarted) {
+  if (isStopped || isPaused) { // action: start/resume
     startTimer();
+
+    isStarted = true;
     isPaused = false;
-  } else {
+    isStopped = false;
+  } else if (isStarted) { // action: pause
     if (state == WORK) {
       clearInterval(workInterval);
     } else if (state == BREAK) {
       clearInterval(breakInterval);
     }
 
-    isStarted = false;
     isPaused = true;
+    isStopped = false;
+
     start.textContent = RESUME;
   }
 });
@@ -126,8 +124,10 @@ timer.addEventListener("donePomodoro", (e) => {
   document.querySelector(".pomodoro-icons > img:nth-child(" +
                           pomodoroCount + ")").style.visibility = "visible";
 
-  mode.textContent = BREAK;
   state = BREAK;
+  minutes = pomodoroCount == 4 ? LONGBREAKMIN : SHORTBREAKMIN;
+  seconds = DEFAULT_SEC;
+  mode.textContent = BREAK;
 
   startTimer();
 });
@@ -143,8 +143,10 @@ timer.addEventListener("doneBreak", (e) => {
     pomodoroCount = 0;
   }
 
-  mode.textContent = WORK;
   state = WORK;
+  minutes = WORKMIN;
+  seconds = DEFAULT_SEC;
+  mode.textContent = WORK;
 
   startTimer();
 });
