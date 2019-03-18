@@ -1,9 +1,9 @@
-/* TODO: update styles for WORK/BREAK mode */
-
+/* GLOBAL STYLES */
 * {
   box-sizing: border-box;
   font-family: 'Open Sans', helvetica, arial, sans;
 }
+
 
 /* OUTER BOX STYLES */
 .container {
@@ -15,11 +15,23 @@
   /* width: 400px; */
 }
 
+
 /* TIMER STYLES */
 .timer {
   font-size: 7em;
   line-height: 0;
   font-weight: bold;
+}
+
+
+/* MODE STYLES */
+.mode {
+  background: #34495e;
+  color: #fff;
+  display: inline-block;
+  font-size: 2em;
+  margin: 0;
+  padding: 0 10px;
 }
 
 /* BUTTON STYLES */
