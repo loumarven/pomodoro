@@ -13,9 +13,9 @@ pomodoroMode.textContent = pomodoro.getCurrentTimer();
 
 /* event listeners for start and stop buttons */
 start.addEventListener("click", (e) => {
-  let timer = pomodoro.getCurrentTimer();
+  let currentTimer = pomodoro.getCurrentTimer();
 
-  if (timer == WORK) {
+  if (currentTimer == WORK) {
     if (start.textContent == START) {
       pomodoro.startWork();
       start.textContent = PAUSE;
@@ -26,7 +26,7 @@ start.addEventListener("click", (e) => {
       pomodoro.resumeWork();
       start.textContent = PAUSE;
     }
-  } else if (timer == BREAK) {
+  } else if (currentTimer == BREAK) {
     if (start.textContent == PAUSE) {
       pomodoro.pauseBreak();
       start.textContent = RESUME;
@@ -35,18 +35,21 @@ start.addEventListener("click", (e) => {
       start.textContent = PAUSE;
     }
   }
+
+  pomodoroMode.textContent = currentTimer;
 });
 
 stop.addEventListener("click", (e) => {
-  let timer = pomodoro.getCurrentTimer();
+  let currentTimer = pomodoro.getCurrentTimer();
 
-  if (timer == WORK) {
+  if (currentTimer == WORK) {
     pomodoro.stopWork();
-  } else if (timer == BREAK) {
+  } else if (currentTimer == BREAK) {
     pomodoro.stopBreak();
   }
 
   start.textContent = START;
+  pomodoroMode.textContent = currentTimer;
 });
 
 /* callback function to be executed each time a timer finishes */

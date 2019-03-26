@@ -10,7 +10,7 @@ const RESUME = "RESUME";
 
 function Pomodoro(timerElement, notifyFinishedTimer) {
   const STOPPED = "STOPPED";
-  const STARTED = "STARTED";
+  const RUNNING = "RUNNING";
   const PAUSED = "PAUSED";
   const DEFWORKMIN = 25;
   const DEFSHORTBREAKMIN = 5;
@@ -22,7 +22,7 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
   let minutes = workMinutes;
   let seconds = 0;
   let state = STOPPED;
-  let timer = WORK;
+  let currentTimer = WORK;
   let workInterval = 0;
   let breakInterval = 0;
   let pomodoroCount = 0;
@@ -34,7 +34,7 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
   };
 
   this.getCurrentTimer = function getCurrentTimer() {
-    return timer;
+    return currentTimer;
   };
 
   this.getWorkTimer = function getWorkTimer() {
@@ -79,8 +79,9 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
       alarm.play();
     }
 
+    currentTimer = WORK;
     startTimer();
-    state = STARTED;
+    state = RUNNING;
 
     return OK;
   };
@@ -102,7 +103,7 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
     }
 
     startTimer();
-    state = STARTED;
+    state = RUNNING;
 
     return OK;
   };
@@ -117,6 +118,23 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
 
     return OK;
   };
+
+  this.startBreak = function startBreak() {
+    if (state != STOPPED) {
+      return ERROR;
+    }
+
+    let alarm = new Audio(breakAlarm);
+    if (alarm) {
+      alarm.play();
+    }
+
+    currentTimer = BREAK;
+    startTimer();
+    state = RUNNING;
+
+    return OK;
+  }
 
   this.pauseBreak = function pauseBreak() {
     if (state == PAUSED) {
@@ -135,7 +153,7 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
     }
 
     startTimer();
-    state = STARTED;
+    state = RUNNING;
 
     return OK;
   };
@@ -156,9 +174,9 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
   function startTimer() {
     timerElement.textContent = makeTwoDigits(minutes) + ":" + makeTwoDigits(seconds);
 
-    if (timer == WORK) {
+    if (currentTimer == WORK) {
       workInterval = setInterval(runTimer, 1000);
-    } else if (timer == BREAK) {
+    } else if (currentTimer == BREAK) {
       breakInterval = setInterval(runTimer, 1000);
     }
   }
@@ -184,7 +202,7 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
     seconds = 0;
     workInterval = 0;
     breakInterval = 0;
-    timer = WORK;
+    currentTimer = WORK;
 
     timerElement.textContent = makeTwoDigits(minutes) + ":" + makeTwoDigits(seconds);
   }
@@ -196,40 +214,31 @@ function Pomodoro(timerElement, notifyFinishedTimer) {
 
   /* event listener triggered when a timer finishes */
   timerElement.addEventListener("finishedTimer", (e) => {
-    let finishedTimer = timer;
+    let finishedTimer = currentTimer;
     let alarm;
 
-    if (timer == WORK) { // finished work minutes, take a break
+    state = STOPPED;
+    seconds = 0;
+
+    if (currentTimer == WORK) { // finished work minutes, take a break
       clearInterval(workInterval);
 
-      timer = BREAK;
-      alarm = new Audio(breakAlarm);
-      if (alarm) {
-        alarm.play();
-      }
-
       pomodoroCount++;
-
       if (pomodoroCount == 4) {
         minutes = longBreakMinutes;
         pomodoroCount = 0;
       } else {
         minutes = shortBreakMinutes;
       }
-    } else if (timer == BREAK) { // finished break minutes, back to work
+
+      this.startBreak();
+    } else if (currentTimer == BREAK) { // finished break minutes, back to work
       clearInterval(breakInterval);
 
-      timer = WORK;
-      alarm = new Audio(workAlarm);
-      if (alarm) {
-        alarm.play();
-      }
-
       minutes = workMinutes;
+      this.startWork();
     }
 
-    seconds = 0;
-    startTimer();
     notifyFinishedTimer(finishedTimer);
   });
 }
